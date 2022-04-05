@@ -4,8 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -31,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button on = (Button) findViewById(R.id.onButton);
+        Button search = (Button)findViewById(R.id.search_button);
 //        Button search = (Button) findViewById(R.id.search_button);
         ListView list = (ListView) findViewById(R.id.list);
         // if bluetooth is active when user open the app
@@ -43,8 +48,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 requestBluetooth();
-                getDevices();
-                showDevices(list);
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        getDevices();
+                        showDevices(list);
+                    }
+                }, 3000);
+
+            }
+        });
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
 //        search.setOnClickListener(new View.OnClickListener() {
@@ -88,6 +106,14 @@ public class MainActivity extends AppCompatActivity {
 //                }
 //            }
 //        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Don't forget to unregister the ACTION_FOUND receiver.
+        unregisterReceiver(receiver);
     }
     private void showDevices(ListView list){
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, example);
@@ -139,4 +165,20 @@ public class MainActivity extends AppCompatActivity {
             Log.i("device", "404 No devices found");
         }
     }
+    private void searchBluetoothDevices(){
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(receiver, filter);
+    }
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Discovery has found a device. Get the BluetoothDevice
+                // object and its info from the Intent.
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                String deviceName = device.getName();
+                String deviceHardwareAddress = device.getAddress(); // MAC address
+            }
+        }
+    };
 }

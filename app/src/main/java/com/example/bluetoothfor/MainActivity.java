@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Button on = (Button) findViewById(R.id.onButton);
         Button search = (Button)findViewById(R.id.search_button);
-//        Button search = (Button) findViewById(R.id.search_button);
         ListView list = (ListView) findViewById(R.id.list);
         // if bluetooth is active when user open the app
         if( bluetoothAdapter.isEnabled() ){
@@ -63,49 +62,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+                registerReceiver(receiver, filter);
+                final BroadcastReceiver receiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        String action = intent.getAction();
+                        if(BluetoothDevice.ACTION_FOUND.equals(action)) {
+                            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                            String deviceName = device.getName();
+                            String deviceAddress = device.getAddress();
+                            Log.i("deviceNAme: ", deviceName);
+                        }
+                    }
+                };
             }
         });
-//        search.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-////                getDevices();
-//                showDevices(list);
-//            }
-//        });
-
-//
-//        if (bluetoothAdapter == null) {
-//            // Device doesn't support Bluetooth
-//        }else{
-//            if (!bluetoothAdapter.isEnabled()) {
-//                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//                startActivityForResult(enableBtIntent, 0);
-//
-//                Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-//                if (pairedDevices.size() > 0) {
-//                    // There are paired devices. Get the name and address of each paired device.
-//                    for (BluetoothDevice device : pairedDevices) {
-//                        String deviceName = device.getName();
-//                        String deviceHardwareAddress = device.getAddress(); // MAC address
-//                        Log.i("device", deviceName);
-//                    }
-//                }else {
-//                    Log.i("device", "no found");
-//                }
-//            }else{
-//                Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-//                if (pairedDevices.size() > 0) {
-//                    // There are paired devices. Get the name and address of each paired device.
-//                    for (BluetoothDevice device : pairedDevices) {
-//                        String deviceName = device.getName();
-//                        String deviceHardwareAddress = device.getAddress(); // MAC address
-//                        Log.i("device", deviceName);
-//                    }
-//                }else {
-//                    Log.i("device", "no found");
-//                }
-//            }
-//        }
     }
 
     @Override
@@ -181,4 +153,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+    private void searchDevices(){
+
+    }
 }
